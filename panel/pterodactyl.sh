@@ -309,6 +309,8 @@ print_status "Finalizing installation..."
 cd /var/www/pterodactyl
 sed -i '/^APP_ENVIRONMENT_ONLY=/d' .env
 echo "APP_ENVIRONMENT_ONLY=false" >> .env
+cd /var/www/pterodactyl
+php artisan p:user:make
 
 # Clear and show completion message
 clear
