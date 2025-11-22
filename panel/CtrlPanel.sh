@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ============================================
-# CtrlPanel Full Auto Installer (Nobita Final Supreme)
-# ============================================
-
 DB_NAME="ctrlpanel"
 DB_USER="ctrlpaneluser"
 DB_PASS="USE_YOUR_OWN_PASSWORD"
@@ -13,27 +9,19 @@ echo ""
 echo ">>> CtrlPanel Auto Installer Starting..."
 echo ""
 
-# Ask domain
 read -p "Enter your domain or IP (example: panel.yourdomain.com or 1.2.3.4): " DOMAIN
 echo "Using domain: $DOMAIN"
 echo ""
 
-# -----------------------------
-# Cleanup broken Sury repo on noble
-# -----------------------------
 cleanup_old_sury() {
     if [ "$(lsb_release -sc)" = "noble" ]; then
-        echo ">>> Noble detected — purging ANY old Sury PHP repo traces..."
         rm -f /etc/apt/sources.list.d/php.list
         rm -f /usr/share/keyrings/deb.sury.org-php.gpg
     fi
 }
 
-# -----------------------------
-# Detect OS
-# -----------------------------
 detect_os() {
-    . /etc/os-release || { echo "Unsupported OS"; exit 1; }
+    . /etc/os-release
     OS="$ID"
     VER="$VERSION_ID"
     CODENAME=$(lsb_release -sc)
@@ -41,42 +29,31 @@ detect_os() {
 
 check_supported() {
     case "$OS" in
-        ubuntu) [[ "$VER" =~ ^(20.04|22.04|24.04)$ ]] || { echo "Ubuntu $VER unsupported"; exit 1; };;
-        debian) [[ "$VER" =~ ^(10|11|12)$ ]] || { echo "Debian $VER unsupported"; exit 1; };;
-        *) echo "Unsupported OS: $OS $VER"; exit 1;;
+        ubuntu) [[ "$VER" =~ ^(20.04|22.04|24.04)$ ]] || exit 1;;
+        debian) [[ "$VER" =~ ^(10|11|12)$ ]] || exit 1;;
+        *) exit 1;;
     esac
 }
 
-# -----------------------------
-# Base deps
-# -----------------------------
 install_base_packages() {
     apt update -y
     apt install -y software-properties-common curl apt-transport-https \
         ca-certificates gnupg lsb-release wget sudo git mariadb-server
 }
 
-# -----------------------------
-# Auto Detect PHP Repo (NOBLE SAFE)
-# -----------------------------
 add_php_repo_auto() {
     SURY_SUPPORTED=("focal" "jammy" "bookworm" "bullseye" "buster")
 
     if printf "%s\n" "${SURY_SUPPORTED[@]}" | grep -q "^${CODENAME}$"; then
-        echo ">>> Sury PHP repo supported for ${CODENAME}, enabling..."
         wget -qO /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg
         echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" \
             > /etc/apt/sources.list.d/php.list
         SKIP_PHP_REPO=0
     else
-        echo ">>> ${CODENAME} is NOT supported by Sury — switching to system PHP."
         SKIP_PHP_REPO=1
     fi
 }
 
-# -----------------------------
-# Redis Repo
-# -----------------------------
 add_redis_repo() {
     curl -fsSL https://packages.redis.io/gpg \
         | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
@@ -85,16 +62,11 @@ add_redis_repo() {
         > /etc/apt/sources.list.d/redis.list
 }
 
-# -----------------------------
-# PHP Install Auto Switch
-# -----------------------------
 install_php_auto() {
     apt update -y
     if [ "${SKIP_PHP_REPO:-1}" -eq 1 ]; then
-        echo ">>> Installing default PHP from OS..."
         apt install -y php php-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip,intl} nginx redis-server
     else
-        echo ">>> Installing PHP 8.3 from Sury..."
         apt install -y php8.3 php8.3-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip,intl,redis} nginx redis-server
     fi
 }
@@ -103,17 +75,11 @@ enable_redis() {
     systemctl enable --now redis-server
 }
 
-# -----------------------------
-# Composer
-# -----------------------------
 install_composer() {
     curl -sS https://getcomposer.org/installer \
         | php -- --install-dir=/usr/local/bin --filename=composer
 }
 
-# -----------------------------
-# CtrlPanel Clone + Laravel Build
-# -----------------------------
 clone_ctrlpanel() {
     mkdir -p /var/www/ctrlpanel
     cd /var/www/ctrlpanel
@@ -126,9 +92,6 @@ laravel_build() {
     php artisan storage:link
 }
 
-# -----------------------------
-# SSL Self-Signed
-# -----------------------------
 setup_ssl() {
     mkdir -p /etc/certs/ctrlpanel
     cd /etc/certs/ctrlpanel
@@ -137,19 +100,13 @@ setup_ssl() {
         -keyout privkey.pem -out fullchain.pem
 }
 
-# -----------------------------
-# Database Setup
-# -----------------------------
 setup_mariadb() {
     mariadb -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
     mariadb -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
-    mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT_OPTION;"
+    mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
     mariadb -e "FLUSH PRIVILEGES;"
 }
 
-# -----------------------------
-# Nginx Setup
-# -----------------------------
 setup_nginx() {
 cat >/etc/nginx/sites-available/ctrlpanel.conf <<EOF
 server {
@@ -191,9 +148,6 @@ EOF
     systemctl restart nginx
 }
 
-# -----------------------------
-# Permissions + Cron
-# -----------------------------
 setup_permissions_and_cron() {
     chown -R www-data:www-data /var/www/ctrlpanel/
     chmod -R 755 /var/www/ctrlpanel/storage/* /var/www/ctrlpanel/bootstrap/cache/
@@ -204,9 +158,6 @@ setup_permissions_and_cron() {
     (crontab -l 2>/dev/null; echo "* * * * * php /var/www/ctrlpanel/artisan schedule:run >> /dev/null 2>&1") | crontab -
 }
 
-# -----------------------------
-# Queue Worker
-# -----------------------------
 setup_queue_worker() {
 cat >/etc/systemd/system/ctrlpanel.service <<EOF
 [Unit]
@@ -226,9 +177,6 @@ EOF
     systemctl enable --now ctrlpanel.service
 }
 
-# -----------------------------
-# MAIN
-# -----------------------------
 main() {
     cleanup_old_sury
     detect_os
