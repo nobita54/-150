@@ -7,287 +7,241 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
+WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-# Function to display custom header
-display_header() {
+# UI Functions
+print_header() {
     clear
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${CYAN}"
-    echo "   ███╗   ██╗ ██████╗ ██████╗ ██╗████████╗ █████╗ "
-    echo "   ████╗  ██║██╔═══██╗██╔══██╗██║╚══██╔══╝██╔══██╗"
-    echo "   ██╔██╗ ██║██║   ██║██████╔╝██║   ██║   ███████║"
-    echo "   ██║╚██╗██║██║   ██║██╔══██╗██║   ██║   ██╔══██║"
-    echo "   ██║ ╚████║╚██████╔╝██║  ██║██║   ██║   ██║  ██║"
-    echo "   ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝  ╚═╝"
-    echo -e "${NC}"$
-    echo -e "${CYAN}           Thank you for using Nobita-hosting!${NC}"
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    sleep 2
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║                   PTERODACTYL PANEL INSTALLER               ║"
+    echo "║                     Automated Installation                  ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
 }
 
-# Function to display status messages
-status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
+print_step() {
+    echo -e "\n${YELLOW}▶ ${BLUE}$1${NC}"
 }
 
-success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
 }
 
-warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
 }
 
-error() {
-    echo -e "${RED}[ERROR]${NC} $1"
+print_info() {
+    echo -e "${CYAN}ℹ $1${NC}"
 }
 
-# Function to check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
+print_warning() {
+    echo -e "${YELLOW}⚠ $1${NC}"
 }
 
-# Function to detect existing installation
-detect_existing_installation() {
-    status "Scanning for existing Pterodactyl installation..."
+progress_bar() {
+    local duration=$1
+    local steps=20
+    local step_delay=$(echo "scale=3; $duration/$steps" | bc)
     
-    local detected_components=()
+    echo -ne "${PURPLE}["
+    for ((i=0; i<steps; i++)); do
+        echo -ne "█"
+        sleep $step_delay
+    done
+    echo -e "]${NC}"
+}
+
+spinner() {
+    local pid=$1
+    local delay=0.1
+    local spinstr='|/-\'
+    while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
+confirm_installation() {
+    print_header
+    echo -e "${WHITE}This script will install Pterodactyl Panel with the following components:${NC}"
+    echo -e "${CYAN}"
+    echo "  • Nginx Web Server"
+    echo "  • PHP 8.3 with required extensions"
+    echo "  • MariaDB Database"
+    echo "  • Redis Server"
+    echo "  • Composer Package Manager"
+    echo -e "${NC}"
+    echo -e "${YELLOW}Domain: ${WHITE}$DOMAIN${NC}"
+    echo -e "${YELLOW}Database: ${WHITE}panel${NC}"
+    echo -e "${YELLOW}Database User: ${WHITE}pterodactyl${NC}"
     
-    # Check for panel directory
-    if [ -d "/var/www/pterodactyl" ]; then
-        detected_components+=("Panel Directory: /var/www/pterodactyl")
+    echo -e "\n${RED}Warning: This will modify system configuration and install packages.${NC}"
+    read -p "$(echo -e ${YELLOW}"Do you want to continue? (y/N): "${NC})" -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Installation cancelled.${NC}"
+        exit 1
     fi
+}
+
+get_user_input() {
+    print_header
+    echo -e "${WHITE}Please provide the following information:${NC}\n"
     
-    # Check for database
-    if command_exists mariadb; then
-        DB_CHECK=$(mariadb -e "SHOW DATABASES LIKE 'panel';" 2>/dev/null | grep -c panel || true)
-        if [ "$DB_CHECK" -eq 1 ]; then
-            detected_components+=("Database: panel")
+    while true; do
+        read -p "$(echo -e ${YELLOW}"Enter your domain (e.g., panel.example.com): "${NC})" DOMAIN
+        if [[ -n "$DOMAIN" ]]; then
+            break
+        else
+            print_error "Domain cannot be empty. Please try again."
         fi
-    fi
+    done
     
-    # Check for nginx config
-    if [ -f "/etc/nginx/sites-available/pterodactyl.conf" ] || [ -f "/etc/nginx/sites-enabled/pterodactyl.conf" ]; then
-        detected_components+=("Nginx Configuration")
+    echo
+    read -p "$(echo -e ${YELLOW}"Enter database password for pterodactyl user (press enter for random): "${NC})" DB_PASS
+    if [[ -z "$DB_PASS" ]]; then
+        DB_PASS=$(openssl rand -base64 16)
+        print_info "Generated random database password"
     fi
+}
+
+show_progress() {
+    local task_name="$1"
+    local task_command="$2"
     
-    # Check for pteroq service
-    if systemctl list-unit-files | grep -q pteroq; then
-        detected_components+=("Queue Worker Service")
-    fi
-    
-    if [ ${#detected_components[@]} -gt 0 ]; then
-        warning "Existing Pterodactyl components detected:"
-        for component in "${detected_components[@]}"; do
-            echo "  - $component"
-        done
-        return 0
+    print_step "$task_name"
+    eval "$task_command" &
+    local pid=$!
+    spinner $pid
+    wait $pid
+    if [ $? -eq 0 ]; then
+        print_success "$task_name completed"
     else
-        success "No existing Pterodactyl installation detected."
-        return 1
+        print_error "$task_name failed"
+        exit 1
     fi
 }
 
-# Function to validate domain
-validate_domain() {
-    local domain=$1
-    if [[ $domain =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to validate IP
-validate_ip() {
-    local ip=$1
-    if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Function to get server IP
-get_server_ip() {
-    # Try different methods to get public IP
-    local pub_ip=$(curl -s -4 ifconfig.co || curl -s -4 icanhazip.com || curl -s -4 ipinfo.io/ip || echo "127.0.0.1")
-    echo "$pub_ip"
-}
-
-# Function to generate random password
-generate_password() {
-    tr -dc 'A-Za-z0-9!@#$%^&*()_+-=' < /dev/urandom | head -c 16
-}
-
-# Function to install dependencies
-install_dependencies() {
-    status "Installing system dependencies..."
+# Main installation function
+install_pterodactyl() {
+    get_user_input
+    confirm_installation
     
-    apt update && apt install -y curl apt-transport-https ca-certificates gnupg unzip git tar sudo lsb-release
+    print_header
+    echo -e "${WHITE}Starting installation process...${NC}"
     
-    # Detect OS
+    # --- Dependencies ---
+    show_progress "Updating package list" "apt update && apt install -y curl apt-transport-https ca-certificates gnupg unzip git tar sudo lsb-release"
+    
+    # Detect OS and setup PHP
+    print_step "Detecting OS and configuring PHP repositories"
     OS=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
     
     if [[ "$OS" == "ubuntu" ]]; then
-        status "Detected Ubuntu. Adding PPA for PHP..."
+        print_info "Detected Ubuntu. Adding PPA for PHP..."
         apt install -y software-properties-common
         LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
     elif [[ "$OS" == "debian" ]]; then
-        status "Detected Debian. Adding SURY PHP repository..."
+        print_info "Detected Debian. Adding SURY PHP repository..."
         curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/sury-php.gpg
         echo "deb [signed-by=/usr/share/keyrings/sury-php.gpg] https://packages.sury.org/php/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/sury-php.list
     fi
     
     # Add Redis repository
+    print_step "Adding Redis repository"
     curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
     echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
     
-    apt update
-}
-
-# Function to install PHP and services
-install_php_services() {
-    status "Installing PHP and required services..."
+    show_progress "Updating repositories" "apt update"
     
-    apt install -y php8.3 php8.3-{cli,fpm,common,mysql,mbstring,bcmath,xml,zip,curl,gd,tokenizer,ctype,simplexml,dom} mariadb-server nginx redis-server
+    # --- Install PHP + extensions ---
+    show_progress "Installing PHP 8.3 and extensions" "apt install -y php8.3 php8.3-{cli,fpm,common,mysql,mbstring,bcmath,xml,zip,curl,gd,tokenizer,ctype,simplexml,dom} mariadb-server nginx redis-server"
     
-    # Install Composer
-    curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-}
-
-# Function to setup database
-setup_database() {
-    local db_name=$1
-    local db_user=$2
-    local db_pass=$3
+    # --- Install Composer ---
+    show_progress "Installing Composer" "curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer"
     
-    status "Setting up MariaDB database..."
-    
-    # Start MariaDB if not running
-    systemctl start mariadb 2>/dev/null || true
-    systemctl enable mariadb 2>/dev/null || true
-    
-    # Secure installation (minimal)
-    mariadb -e "DELETE FROM mysql.user WHERE User='';"
-    mariadb -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-    mariadb -e "FLUSH PRIVILEGES;" 2>/dev/null || true
-    
-    # Create database and user
-    mariadb -e "CREATE DATABASE IF NOT EXISTS ${db_name};" 2>/dev/null || {
-        error "Failed to create database. Please check MariaDB installation."
-        return 1
-    }
-    
-    mariadb -e "CREATE USER IF NOT EXISTS '${db_user}'@'127.0.0.1' IDENTIFIED BY '${db_pass}';" 2>/dev/null || {
-        error "Failed to create database user."
-        return 1
-    }
-    
-    mariadb -e "GRANT ALL PRIVILEGES ON ${db_name}.* TO '${db_user}'@'127.0.0.1' WITH GRANT OPTION;" 2>/dev/null || {
-        error "Failed to grant privileges."
-        return 1
-    }
-    
-    mariadb -e "FLUSH PRIVILEGES;"
-    
-    success "Database setup completed successfully!"
-}
-
-# Function to install panel
-install_panel() {
-    local host=$1
-    local use_ssl=$2
-    local db_name=$3
-    local db_user=$4
-    local db_pass=$5
-    
-    status "Installing Pterodactyl Panel..."
-    
+    # --- Download Pterodactyl Panel ---
+    print_step "Downloading Pterodactyl Panel"
     mkdir -p /var/www/pterodactyl
     cd /var/www/pterodactyl
-    
-    # Download panel
     curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
     tar -xzvf panel.tar.gz
     chmod -R 755 storage/* bootstrap/cache/
+    print_success "Pterodactyl Panel downloaded and extracted"
     
-    # Setup .env file
+    # --- MariaDB Setup ---
+    print_step "Setting up MariaDB database"
+    DB_NAME=panel
+    DB_USER=pterodactyl
+    
+    mariadb -e "CREATE USER '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
+    mariadb -e "CREATE DATABASE ${DB_NAME};"
+    mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
+    mariadb -e "FLUSH PRIVILEGES;"
+    print_success "Database setup completed"
+    
+    # --- .env Setup ---
+    print_step "Configuring environment file"
     if [ ! -f ".env.example" ]; then
         curl -Lo .env.example https://raw.githubusercontent.com/pterodactyl/panel/develop/.env.example
     fi
-    
     cp .env.example .env
-    
-    # Configure .env based on SSL choice
-    if [ "$use_ssl" == "yes" ]; then
-        sed -i "s|APP_URL=.*|APP_URL=https://${host}|g" .env
-    else
-        sed -i "s|APP_URL=.*|APP_URL=http://${host}|g" .env
-    fi
-    
-    sed -i "s|DB_DATABASE=.*|DB_DATABASE=${db_name}|g" .env
-    sed -i "s|DB_USERNAME=.*|DB_USERNAME=${db_user}|g" .env
-    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${db_pass}|g" .env
-    
+    sed -i "s|APP_URL=.*|APP_URL=https://${DOMAIN}|g" .env
+    sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_NAME}|g" .env
+    sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USER}|g" .env
+    sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASS}|g" .env
     if ! grep -q "^APP_ENVIRONMENT_ONLY=" .env; then
         echo "APP_ENVIRONMENT_ONLY=false" >> .env
     fi
+    print_success "Environment configuration completed"
     
-    # Install PHP dependencies
-    status "Installing PHP dependencies..."
-    COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
+    # --- Install PHP dependencies ---
+    show_progress "Installing PHP dependencies" "COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader"
     
-    # Generate application key
-    php artisan key:generate --force
+    # --- Generate Application Key ---
+    show_progress "Generating application key" "php artisan key:generate --force"
     
-    # Run migrations
-    php artisan migrate --seed --force
+    # --- Run Migrations ---
+    show_progress "Running database migrations" "php artisan migrate --seed --force"
     
-    # Set permissions
+    # --- Permissions ---
+    print_step "Setting up permissions and cron job"
     chown -R www-data:www-data /var/www/pterodactyl/*
-}
-
-# Function to setup SSL
-setup_ssl() {
-    local host=$1
+    apt install -y cron
+    systemctl enable --now cron
+    (crontab -l 2>/dev/null; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
+    print_success "Permissions and cron setup completed"
     
-    status "Setting up SSL certificates..."
-    
+    # --- SSL Certificate ---
+    print_step "Generating SSL certificate"
     mkdir -p /etc/certs/panel
     cd /etc/certs/panel
-    
-    # Generate self-signed certificate
     openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 \
-        -subj "/C=US/ST=Auto/L=Auto/O=Auto/CN=${host}" \
+        -subj "/C=NA/ST=NA/L=NA/O=NA/CN=Generic SSL Certificate" \
         -keyout privkey.pem -out fullchain.pem 2>/dev/null
+    print_success "SSL certificate generated"
     
-    success "SSL certificates generated!"
-}
-
-# Function to setup nginx with SSL choice
-setup_nginx() {
-    local host=$1
-    local use_ssl=$2
+    # --- Nginx Setup ---
+    print_step "Configuring Nginx"
+    PHP_VERSION="8.3"
     
-    status "Configuring Nginx..."
-    
-    # Get PHP version dynamically
-    PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
-    
-    if [ "$use_ssl" == "yes" ]; then
-        # Configuration with SSL
-        tee /etc/nginx/sites-available/pterodactyl.conf > /dev/null << EOF
+    tee /etc/nginx/sites-available/pterodactyl.conf > /dev/null << EOF
 server {
     listen 80;
-    server_name ${host};
+    server_name ${DOMAIN};
     return 301 https://\$server_name\$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name ${host};
+    server_name ${DOMAIN};
 
     root /var/www/pterodactyl/public;
     index index.php;
@@ -317,56 +271,13 @@ server {
     }
 }
 EOF
-    else
-        # Configuration without SSL
-        tee /etc/nginx/sites-available/pterodactyl.conf > /dev/null << EOF
-server {
-    listen 80;
-    server_name ${host};
 
-    root /var/www/pterodactyl/public;
-    index index.php;
-
-    client_max_body_size 100m;
-    client_body_timeout 120s;
-    sendfile off;
-
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
-
-    location ~ \.php\$ {
-        fastcgi_split_path_info ^(.+\.php)(/.+)\$;
-        fastcgi_pass unix:/run/php/php${PHP_VERSION}-fpm.sock;
-        fastcgi_index index.php;
-        include /etc/nginx/fastcgi_params;
-        fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M";
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    }
-
-    location ~ /\.ht {
-        deny all;
-    }
-}
-EOF
-    fi
-
-    # Enable site
-    ln -sf /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/
-    
-    # Remove default nginx site
-    rm -f /etc/nginx/sites-enabled/default
-    
-    # Test and restart nginx
+    ln -sf /etc/nginx/sites-available/pterodactyl.conf /etc/nginx/sites-enabled/pterodactyl.conf
     nginx -t && systemctl restart nginx
+    print_success "Nginx configuration completed"
     
-    success "Nginx configuration completed!"
-}
-
-# Function to setup queue worker
-setup_queue_worker() {
-    status "Setting up queue worker..."
-    
+    # --- Queue Worker ---
+    print_step "Setting up queue worker service"
     tee /etc/systemd/system/pteroq.service > /dev/null << 'EOF'
 [Unit]
 Description=Pterodactyl Queue Worker
@@ -386,261 +297,61 @@ EOF
     systemctl daemon-reload
     systemctl enable --now redis-server
     systemctl enable --now pteroq.service
-    
-    success "Queue worker setup completed!"
-}
-
-# Function to setup cron
-setup_cron() {
-    status "Setting up cron job..."
-    
-    apt install -y cron
-    systemctl enable --now cron
-    
-    # Add schedule runner
-    (crontab -l 2>/dev/null | grep -v "artisan schedule:run"; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
-    
-    success "Cron job setup completed!"
-}
-
-# Function to show installation summary
-show_summary() {
-    local host=$1
-    local use_ssl=$2
-    local db_user=$3
-    local db_pass=$4
-    
-    display_header
-    echo -e "\n${GREEN}"
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                    INSTALLATION COMPLETE!                   ║"
-    echo "╚══════════════════════════════════════════════════════════════╗"
-    echo -e "${NC}"
-    echo -e "${CYAN}┌──────────────────────────────────────────────────────────┐${NC}"
-    
-    if [ "$use_ssl" == "yes" ]; then
-        echo -e "${CYAN}│ ${YELLOW}🌐 PANEL URL (HTTPS)${NC}${CYAN}                           │${NC}"
-        echo -e "${CYAN}│   ${GREEN}https://${host}${NC}"
-    else
-        echo -e "${CYAN}│ ${YELLOW}🌐 PANEL URL (HTTP)${NC}${CYAN}                            │${NC}"
-        echo -e "${CYAN}│   ${GREEN}http://${host}${NC}"
-        echo -e "${CYAN}│   ${YELLOW}Note: Running without SSL${NC}"
-    fi
-    
-    echo -e "${CYAN}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${CYAN}│ ${YELLOW}📁 INSTALLATION DIRECTORY${NC}${CYAN}                     │${NC}"
-    echo -e "${CYAN}│   ${GREEN}/var/www/pterodactyl${NC}"
-    echo -e "${CYAN}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${CYAN}│ ${YELLOW}🗄️  DATABASE CREDENTIALS${NC}${CYAN}                      │${NC}"
-    echo -e "${CYAN}│   ${GREEN}Database: panel${NC}"
-    echo -e "${CYAN}│   ${GREEN}Username: ${db_user}${NC}"
-    echo -e "${CYAN}│   ${GREEN}Password: ${db_pass}${NC}"
-    echo -e "${CYAN}├──────────────────────────────────────────────────────────┤${NC}"
-    echo -e "${CYAN}│ ${YELLOW}🔧 NEXT STEPS${NC}${CYAN}                                 │${NC}"
-    echo -e "${CYAN}│   ${GREEN}1. Create admin user:${NC}"
-    echo -e "${CYAN}│      cd /var/www/pterodactyl && php artisan p:user:make${NC}"
-    echo -e "${CYAN}│   ${GREEN}2. Check services:${NC}"
-    echo -e "${CYAN}│      systemctl status nginx pteroq${NC}"
-    if [ "$use_ssl" == "no" ]; then
-        echo -e "${CYAN}│   ${YELLOW}3. For production, consider:${NC}"
-        echo -e "${CYAN}│      - Setting up proper SSL certificates${NC}"
-    fi
-    echo -e "${CYAN}└──────────────────────────────────────────────────────────┘${NC}"
-    echo -e "\n${PURPLE}🎉 Pterodactyl Panel has been successfully installed!${NC}\n"
-}
-
-# Function to get user input for domain and SSL
-get_installation_config() {
-    display_header
-    
-    # Get domain or IP
-    while true; do
-        echo -e "${CYAN}Enter your domain or IP address:${NC}"
-        echo -e "  ${YELLOW}Examples:${NC}"
-        echo -e "  - Domain: panel.example.com"
-        echo -e "  - IP: 192.168.1.100"
-        echo
-        read -p "$(status 'Enter domain or IP: ')" HOST
-        
-        if validate_domain "$HOST" || validate_ip "$HOST"; then
-            success "Valid host: $HOST"
-            break
-        else
-            error "Invalid input. Please enter a valid domain or IP address."
-        fi
-    done
-    
-    echo
-    
-    # Get SSL choice
-    while true; do
-        echo -e "${CYAN}Do you want to enable SSL?${NC}"
-        echo -e "  ${GREEN}yes${NC}) Enable SSL (HTTPS) - Recommended for domains"
-        echo -e "  ${RED}no${NC})  Disable SSL (HTTP) - For testing or local IP"
-        echo
-        read -p "$(status 'Enable SSL? (yes/no): ')" SSL_CHOICE
-        
-        case $SSL_CHOICE in
-            [Yy][Ee][Ss]|Y|y)
-                USE_SSL="yes"
-                success "SSL will be enabled"
-                break
-                ;;
-            [Nn][Oo]|N|n)
-                USE_SSL="no"
-                warning "SSL will be disabled - using HTTP"
-                break
-                ;;
-            *)
-                error "Invalid choice. Please enter 'yes' or 'no'."
-                ;;
-        esac
-    done
-}
-
-# Main installation function
-main_installation() {
-    display_header
-    
-    # Detect existing installation
-    if detect_existing_installation; then
-        echo
-        read -p "$(warning 'Existing installation detected. Continue? (y/N): ')" -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            error "Installation aborted by user."
-            exit 1
-        fi
-    fi
-    
-    # Get installation configuration
-    get_installation_config
-    
-    # Generate credentials
-    DB_NAME="panel"
-    DB_USER="pterodactyl"
-    DB_PASS=$(generate_password)
-    
-    echo
-    status "Starting installation with the following configuration:"
-    echo "  Host: $HOST"
-    if [ "$USE_SSL" == "yes" ]; then
-        echo "  SSL: Enabled (HTTPS)"
-    else
-        echo "  SSL: Disabled (HTTP)"
-    fi
-    echo "  Database: $DB_NAME"
-    echo "  DB User: $DB_USER"
-    echo "  DB Password: $DB_PASS"
-    echo
-    
-    read -p "$(warning 'Proceed with installation? (y/N): ')" -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        error "Installation aborted by user."
-        exit 1
-    fi
-    
-    # Installation steps
-    install_dependencies
-    install_php_services
-    setup_database "$DB_NAME" "$DB_USER" "$DB_PASS"
-    install_panel "$HOST" "$USE_SSL" "$DB_NAME" "$DB_USER" "$DB_PASS"
-    
-    # Setup SSL only if enabled
-    if [ "$USE_SSL" == "yes" ]; then
-        setup_ssl "$HOST"
-    fi
-    
-    setup_nginx "$HOST" "$USE_SSL"
-    setup_queue_worker
-    setup_cron
+    print_success "Queue worker service setup completed"
     
     # Final setup
+    print_step "Finalizing installation"
     cd /var/www/pterodactyl
     sed -i '/^APP_ENVIRONMENT_ONLY=/d' .env
     echo "APP_ENVIRONMENT_ONLY=false" >> .env
     
-    show_summary "$HOST" "$USE_SSL" "$DB_USER" "$DB_PASS"
+    progress_bar 3
+    print_success "Final configuration completed"
+    
+    show_final_summary
 }
 
-# Menu system
-show_menu() {
-    display_header
-    echo -e "${CYAN}Select an option:${NC}"
-    echo -e "  ${GREEN}1${NC}) Fresh Installation"
-    echo -e "  ${GREEN}2${NC}) Check Existing Installation"
-    echo -e "  ${GREEN}3${NC}) Create Admin User"
-    echo -e "  ${GREEN}4${NC}) Check Services Status"
-    echo -e "  ${GREEN}5${NC}) Exit"
-    echo
+show_final_summary() {
+    print_header
+    echo -e "${GREEN}"
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║                   INSTALLATION COMPLETE!                    ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    
+    echo -e "\n${WHITE}Your Pterodactyl Panel has been successfully installed!${NC}\n"
+    
+    echo -e "${CYAN}┌──────────────────────────────────────────────────────────┐${NC}"
+    echo -e "${CYAN}│                     ${WHITE}PANEL DETAILS${CYAN}                     │${NC}"
+    echo -e "${CYAN}├──────────────────────────────────────────────────────────┤${NC}"
+    echo -e "${CYAN}│  ${YELLOW}🌐 Panel URL:${WHITE} https://${DOMAIN}${CYAN}                   │${NC}"
+    echo -e "${CYAN}│  ${YELLOW}📂 Installation:${WHITE} /var/www/pterodactyl${CYAN}            │${NC}"
+    echo -e "${CYAN}│  ${YELLOW}🔧 Database:${WHITE} panel${CYAN}                               │${NC}"
+    echo -e "${CYAN}│  ${YELLOW}👤 DB User:${WHITE} pterodactyl${CYAN}                          │${NC}"
+    echo -e "${CYAN}│  ${YELLOW}🔑 DB Password:${WHITE} ${DB_PASS}${CYAN}           │${NC}"
+    echo -e "${CYAN}└──────────────────────────────────────────────────────────┘${NC}"
+    
+    echo -e "\n${WHITE}Next steps:${NC}"
+    echo -e "  ${GREEN}1.${NC} Run: ${CYAN}cd /var/www/pterodactyl && php artisan p:user:make${NC}"
+    echo -e "  ${GREEN}2.${NC} Create your admin account when prompted"
+    echo -e "  ${GREEN}3.${NC} Access your panel at ${CYAN}https://${DOMAIN}${NC}"
+    echo -e "  ${GREEN}4.${NC} Consider setting up a proper SSL certificate"
+    
+    echo -e "\n${YELLOW}Services running:${NC}"
+    echo -e "  ${GREEN}✓${NC} Nginx"
+    echo -e "  ${GREEN}✓${NC} PHP-FPM 8.3"
+    echo -e "  ${GREEN}✓${NC} MariaDB"
+    echo -e "  ${GREEN}✓${NC} Redis"
+    echo -e "  ${GREEN}✓${NC} Pterodactyl Queue Worker"
+    
+    echo -e "\n${GREEN}Thank you for using Pterodactyl! 🦖${NC}\n"
 }
 
-check_services() {
-    display_header
-    status "Checking service status..."
-    echo
-    
-    services=("nginx" "mariadb" "redis-server" "pteroq")
-    
-    for service in "${services[@]}"; do
-        if systemctl is-active --quiet "$service"; then
-            echo -e "  ${GREEN}✓${NC} $service: ${GREEN}Running${NC}"
-        else
-            echo -e "  ${RED}✗${NC} $service: ${RED}Not Running${NC}"
-        fi
-    done
-    
-    echo
-    read -p "Press Enter to continue..."
-}
+# Check if running as root
+if [[ $EUID -ne 0 ]]; then
+    print_error "This script must be run as root. Use sudo or switch to root user."
+    exit 1
+fi
 
-create_admin_user() {
-    display_header
-    status "Creating admin user..."
-    
-    if [ -d "/var/www/pterodactyl" ]; then
-        cd /var/www/pterodactyl
-        php artisan p:user:make
-    else
-        error "Pterodactyl panel not found at /var/www/pterodactyl"
-    fi
-    
-    echo
-    read -p "Press Enter to continue..."
-}
-
-# Main menu loop
-while true; do
-    show_menu
-    read -p "$(status 'Enter your choice (1-5): ')" choice
-    
-    case $choice in
-        1)
-            main_installation
-            break
-            ;;
-        2)
-            display_header
-            detect_existing_installation
-            echo
-            read -p "Press Enter to continue..."
-            ;;
-        3)
-            create_admin_user
-            ;;
-        4)
-            check_services
-            ;;
-        5)
-            display_header
-            echo
-            status "Goodbye!"
-            exit 0
-            ;;
-        *)
-            error "Invalid option. Please try again."
-            sleep 2
-            ;;
-    esac
-done
+# Start installation
+install_pterodactyl
