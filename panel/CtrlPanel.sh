@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================
-# CtrlPanel Full Auto Installer (Nobita Final)
+# CtrlPanel Full Auto Installer (Nobita Final Supreme)
 # ============================================
 
 DB_NAME="ctrlpanel"
@@ -14,9 +14,20 @@ echo ">>> CtrlPanel Auto Installer Starting..."
 echo ""
 
 # Ask domain
-read -p "Enter your domain (example: panel.yourdomain.com): " DOMAIN
+read -p "Enter your domain or IP (example: panel.yourdomain.com or 1.2.3.4): " DOMAIN
 echo "Using domain: $DOMAIN"
 echo ""
+
+# -----------------------------
+# Cleanup broken Sury repo on noble
+# -----------------------------
+cleanup_old_sury() {
+    if [ "$(lsb_release -sc)" = "noble" ]; then
+        echo ">>> Noble detected — purging ANY old Sury PHP repo traces..."
+        rm -f /etc/apt/sources.list.d/php.list
+        rm -f /usr/share/keyrings/deb.sury.org-php.gpg
+    fi
+}
 
 # -----------------------------
 # Detect OS
@@ -37,7 +48,7 @@ check_supported() {
 }
 
 # -----------------------------
-# Base dependencies
+# Base deps
 # -----------------------------
 install_base_packages() {
     apt update -y
@@ -46,20 +57,19 @@ install_base_packages() {
 }
 
 # -----------------------------
-# Auto Detect PHP Repo (NOBLE FIX)
+# Auto Detect PHP Repo (NOBLE SAFE)
 # -----------------------------
 add_php_repo_auto() {
     SURY_SUPPORTED=("focal" "jammy" "bookworm" "bullseye" "buster")
 
     if printf "%s\n" "${SURY_SUPPORTED[@]}" | grep -q "^${CODENAME}$"; then
-        echo ">>> Sury PHP repo supported for ${CODENAME}, enabling…"
+        echo ">>> Sury PHP repo supported for ${CODENAME}, enabling..."
         wget -qO /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg
         echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" \
             > /etc/apt/sources.list.d/php.list
         SKIP_PHP_REPO=0
     else
-        echo ">>> '${CODENAME}' is NOT supported by Sury (noble detected?)."
-        echo ">>> Falling back to system PHP."
+        echo ">>> ${CODENAME} is NOT supported by Sury — switching to system PHP."
         SKIP_PHP_REPO=1
     fi
 }
@@ -133,7 +143,7 @@ setup_ssl() {
 setup_mariadb() {
     mariadb -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
     mariadb -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
-    mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
+    mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT_OPTION;"
     mariadb -e "FLUSH PRIVILEGES;"
 }
 
@@ -220,6 +230,7 @@ EOF
 # MAIN
 # -----------------------------
 main() {
+    cleanup_old_sury
     detect_os
     check_supported
 
