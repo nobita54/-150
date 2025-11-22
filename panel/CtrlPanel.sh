@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================
-# CtrlPanel Full Auto Installer (Nobita Mode)
+# CtrlPanel Full Auto Installer (Nobita Final)
 # ============================================
 
 DB_NAME="ctrlpanel"
@@ -46,19 +46,20 @@ install_base_packages() {
 }
 
 # -----------------------------
-# Auto Detect PHP Repo (Sury)
+# Auto Detect PHP Repo (NOBLE FIX)
 # -----------------------------
 add_php_repo_auto() {
-    SUPPORTED=("focal" "jammy" "bookworm" "bullseye" "buster")
+    SURY_SUPPORTED=("focal" "jammy" "bookworm" "bullseye" "buster")
 
-    if printf "%s\n" "${SUPPORTED[@]}" | grep -q "^${CODENAME}$"; then
+    if printf "%s\n" "${SURY_SUPPORTED[@]}" | grep -q "^${CODENAME}$"; then
         echo ">>> Sury PHP repo supported for ${CODENAME}, enabling…"
         wget -qO /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg
         echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ ${CODENAME} main" \
             > /etc/apt/sources.list.d/php.list
+        SKIP_PHP_REPO=0
     else
-        echo ">>> WARNING: Sury repo does NOT support '${CODENAME}'."
-        echo ">>> Installing system PHP instead."
+        echo ">>> '${CODENAME}' is NOT supported by Sury (noble detected?)."
+        echo ">>> Falling back to system PHP."
         SKIP_PHP_REPO=1
     fi
 }
@@ -79,8 +80,8 @@ add_redis_repo() {
 # -----------------------------
 install_php_auto() {
     apt update -y
-    if [ "${SKIP_PHP_REPO:-0}" -eq 1 ]; then
-        echo ">>> Installing system PHP..."
+    if [ "${SKIP_PHP_REPO:-1}" -eq 1 ]; then
+        echo ">>> Installing default PHP from OS..."
         apt install -y php php-{common,cli,gd,mysql,mbstring,bcmath,xml,fpm,curl,zip,intl} nginx redis-server
     else
         echo ">>> Installing PHP 8.3 from Sury..."
@@ -164,7 +165,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php*.fpm.sock;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     }
@@ -249,4 +250,3 @@ main() {
 }
 
 main "$@"
-
