@@ -304,7 +304,8 @@ EOF
     cd /var/www/pterodactyl
     sed -i '/^APP_ENVIRONMENT_ONLY=/d' .env
     echo "APP_ENVIRONMENT_ONLY=false" >> .env
-    
+    cd /var/www/pterodactyl
+    cd /var/www/pterodactyl && php artisan p:user:make
     progress_bar 3
     print_success "Final configuration completed"
     
