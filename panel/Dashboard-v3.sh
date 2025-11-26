@@ -29,8 +29,12 @@ DOMAIN=""
 
 # Function to get domain from user
 get_domain() {
-    echo -e "${YELLOW}Please enter your domain name (e.g., panel.yourdomain.com):${NC}"
-    read -p "Domain: " DOMAIN
+    echo ""
+    echo -e "${GREEN}=== Domain Setup ===${NC}"
+    echo -e "${YELLOW}Please enter your domain name for MythicalDash panel${NC}"
+    echo -e "${YELLOW}Example: panel.yourdomain.com or dash.example.com${NC}"
+    echo ""
+    read -p "Enter your domain: " DOMAIN
     
     # Basic domain validation
     if [[ -z "$DOMAIN" ]]; then
@@ -38,10 +42,41 @@ get_domain() {
         exit 1
     fi
     
-    # Remove http:// or https:// if present
-    DOMAIN=$(echo "$DOMAIN" | sed -E 's|^https?://||')
+    # Remove http:// or https:// and trailing slashes if present
+    DOMAIN=$(echo "$DOMAIN" | sed -E 's|^https?://||' | sed 's|/$||')
     
+    # Remove www. if present
+    DOMAIN=$(echo "$DOMAIN" | sed 's|^www\.||')
+    
+    echo ""
     print_success "Domain set to: $DOMAIN"
+    echo ""
+    
+    # Confirm domain
+    read -p "Is this domain correct? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_warning "Domain confirmation failed. Please run the script again."
+        exit 0
+    fi
+}
+
+# Function to detect if Ubuntu/Debian
+check_ubuntu_debian() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [[ "$ID" == "ubuntu" || "$ID" == "debian" ]]; then
+            echo -e "${GREEN}Detected OS: $PRETTY_NAME ${NC}"
+            return 0
+        else
+            print_error "This script only works on Ubuntu/Debian systems"
+            echo -e "${YELLOW}Detected OS: $PRETTY_NAME ${NC}"
+            exit 1
+        fi
+    else
+        print_error "Cannot detect operating system"
+        exit 1
+    fi
 }
 
 # Function to setup Nginx configuration
@@ -263,9 +298,6 @@ setup_cron_jobs() {
 setup_ubuntu_debian() {
     echo -e "${YELLOW}Starting Ubuntu/Debian setup...${NC}"
     
-    # Get domain from user
-    get_domain
-    
     # Step 1: Update the server
     print_status "Step 1: Updating system packages..."
     apt update && apt upgrade -y
@@ -456,15 +488,19 @@ main() {
     # Check if Ubuntu/Debian
     check_ubuntu_debian
     
-    # Confirm before proceeding
-    echo -e "${YELLOW}This script will:${NC}"
-    echo -e "• Install PHP 8.2, MariaDB, Nginx, Redis"
-    echo -e "• Install Composer and dependencies"
-    echo -e "• Download and setup MythicalDash panel"
-    echo -e "• Configure Nginx with SSL"
-    echo -e "• Setup database and cron jobs"
-    echo -e ""
-    read -p "Do you want to continue? (y/n): " -n 1 -r
+    # Get domain from user FIRST
+    get_domain
+    
+    # Confirm before proceeding with installation
+    echo ""
+    echo -e "${YELLOW}This script will install:${NC}"
+    echo -e "• PHP 8.2, MariaDB, Nginx, Redis"
+    echo -e "• Composer and dependencies"
+    echo -e "• MythicalDash panel for domain: $DOMAIN"
+    echo -e "• SSL Certificate (self-signed)"
+    echo -e "• Database and cron jobs"
+    echo ""
+    read -p "Do you want to continue with installation? (y/n): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         print_warning "Installation cancelled"
@@ -473,24 +509,6 @@ main() {
     
     # Start setup
     setup_ubuntu_debian
-}
-
-# Function to detect if Ubuntu/Debian
-check_ubuntu_debian() {
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        if [[ "$ID" == "ubuntu" || "$ID" == "debian" ]]; then
-            echo -e "${GREEN}Detected OS: $PRETTY_NAME ${NC}"
-            return 0
-        else
-            print_error "This script only works on Ubuntu/Debian systems"
-            echo -e "${YELLOW}Detected OS: $PRETTY_NAME ${NC}"
-            exit 1
-        fi
-    else
-        print_error "Cannot detect operating system"
-        exit 1
-    fi
 }
 
 # Run main function
