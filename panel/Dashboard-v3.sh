@@ -383,7 +383,7 @@ setup_ubuntu_debian() {
     # Step 9: Download and extract MythicalDash
     print_status "Step 9: Downloading MythicalDash..."
     cd /var/www/mythicaldash
-    curl -Lo MythicalDash.zip https://github.com/mythicalltd/mythicaldash/releases/latest/download/MythicalDash.zip
+    curl -Lo MythicalDash.zip https://github.com/MythicalLTD/MythicalDash/releases/download/3.2.3/MythicalDash.zip
     if [ $? -eq 0 ]; then
         print_success "MythicalDash downloaded successfully"
     else
