@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ====================================================
-#          PTERODACTYL INSTALL / UNINSTALL MENU
+#          PTERODACTYL INSTALL / UPDATE / UNINSTALL
 # ====================================================
 
 GREEN="\033[1;32m"
@@ -54,7 +54,6 @@ uninstall_panel() {
     echo "✅ Panel uninstalled successfully!"
 }
 
-# ================= UNINSTALL PTERODACTYL =================
 uninstall_ptero() {
     clear
     echo -e "${CYAN}"
@@ -63,29 +62,76 @@ uninstall_ptero() {
     echo "└──────────────────────────────────────────────┘${NC}"
 
     uninstall_panel
-
     echo -e "${GREEN}✔ Pterodactyl Panel Uninstalled (Wings Not Removed)${NC}"
     read -p "Press Enter to return..."
 }
 
-# ===================== UI MENU =====================
-while true; do
-    clear
-    echo -e "${YELLOW}"
-    echo "╔═══════════════════════════════════════════════╗"
-    echo "║           PTERODACTYL CONTROL MENU            ║"
-    echo "╠═══════════════════════════════════════════════╣"
-    echo -e "║ ${GREEN}1) Install Pterodactyl${NC}                           ║"
-    echo -e "║ ${RED}2) Uninstall Pterodactyl (Panel Only)${NC}            ║"
-    echo -e "║ 3) Exit                                         ║"
-    echo "╚═══════════════════════════════════════════════╝"
-    echo -ne "${CYAN}Select Option: ${NC}"
-    read choice
+# ================= UPDATE FUNCTION =================
+update_panel() {
+clear
+echo "==============================================="
+echo "      🚀 PTERODACTYL PANEL UPDATE SCRIPT 🚀    "
+echo "==============================================="
+echo ""
 
-    case $choice in
-        1) install_ptero ;;
-        2) uninstall_ptero ;;
-        3) clear; exit ;;
-        *) echo -e "${RED}Invalid option...${NC}"; sleep 1 ;;
-    esac
+echo ">>> Starting Pterodactyl Panel Update..."
+
+cd /var/www/pterodactyl || { echo "❌ Panel directory not found!"; read; return; }
+
+echo "⚙️ Putting panel into maintenance mode..."
+php artisan down
+
+echo "⬇️ Downloading latest Panel release..."
+curl -L https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz | tar -xzv
+
+echo "🔑 Setting correct permissions..."
+chmod -R 755 storage/* bootstrap/cache
+
+echo "📦 Running composer install..."
+composer install --no-dev --optimize-autoloader
+
+echo "🧹 Clearing cache..."
+php artisan view:clear
+php artisan config:clear
+
+echo "📂 Running migrations..."
+php artisan migrate --seed --force
+
+echo "👤 Setting ownership..."
+chown -R www-data:www-data /var/www/pterodactyl/*
+
+echo "♻️ Restarting queue..."
+php artisan queue:restart
+
+echo "✅ Panel back online."
+php artisan up
+
+echo ""
+echo "==============================================="
+echo " 🎉 Pterodactyl Panel Update Complete! 🎉 "
+echo "==============================================="
+read -p "Press Enter to return..."
+}
+
+# ===================== MENU =====================
+while true; do
+clear
+echo -e "${YELLOW}"
+echo "╔═══════════════════════════════════════════════╗"
+echo "║           PTERODACTYL CONTROL MENU            ║"
+echo "╠═══════════════════════════════════════════════╣"
+echo -e "║ ${GREEN}1) Install Pterodactyl${NC}                           ║"
+echo -e "║ ${CYAN}2) Update Panel${NC}                                   ║"
+echo -e "║ ${RED}3) Uninstall Pterodactyl (Panel Only)${NC}            ║"
+echo -e "║ 4) Exit                                         ║"
+echo "╚═══════════════════════════════════════════════╝"
+echo -ne "${CYAN}Select Option: ${NC}"; read choice
+
+case $choice in
+    1) install_ptero ;;
+    2) update_panel ;;
+    3) uninstall_ptero ;;
+    4) clear; exit ;;
+    *) echo -e "${RED}Invalid option...${NC}"; sleep 1 ;;
+esac
 done
