@@ -21,7 +21,7 @@ install_ptero() {
     sudo apt update && sudo apt upgrade -y
     sudo apt install -y curl wget git tar zip unzip software-properties-common
 
-    bash <(curl -s https://pterodactyl-installer.se)
+    bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/pterodactyl.sh) 
 
     echo -e "${GREEN}✔ Installation Complete${NC}"
     read -p "Press Enter to return..."
