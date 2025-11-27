@@ -59,7 +59,7 @@ case $p in
  4) bash <(curl -s https://raw.githubusercontent.com/yourlink/jacktera_v4.sh) ;;
  5) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v3.sh) ;;
  6) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v4.sh) ;;
- 7) bash <(curl -s https://raw.githubusercontent.com/yourlink/payment.sh) ;;
+ 7) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Payment.sh) ;;
  8) bash <(curl -s https://raw.githubusercontent.com/yourlink/ctrlpanel.sh) ;;
  9) bash <(curl -s https://raw.githubusercontent.com/yourlink/cpanel.sh) ;;
  10) bash <(curl -s https://raw.githubusercontent.com/yourlink/t-panel.sh) ;;   # UPDATED
