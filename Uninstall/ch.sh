@@ -54,7 +54,7 @@ read -p "Select → " p
 
 case $p in
  1) bash <(curl -s https://raw.githubusercontent.com/yourlink/1panel.sh) ;;
- 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/pterodactyl.sh) ;;
+ 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unPterodactyl.sh) ;;
  3) bash <(curl -s https://raw.githubusercontent.com/yourlink/jacktera_v3.sh) ;;
  4) bash <(curl -s https://raw.githubusercontent.com/yourlink/jacktera_v4.sh) ;;
  5) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v3.sh) ;;
