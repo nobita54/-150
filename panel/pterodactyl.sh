@@ -100,8 +100,8 @@ systemctl enable --now cron
 (crontab -l 2>/dev/null; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
 
 # --- Nginx Setup ---
-mkdir -p /etc/certs/panel
-cd /etc/certs/panel
+mkdir -p /etc/certs/pterodactyl
+cd /etc/certs/pterodactyl
 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 \
 -subj "/C=NA/ST=NA/L=NA/O=NA/CN=Generic SSL Certificate" \
 -keyout privkey.pem -out fullchain.pem
