@@ -41,7 +41,7 @@ echo -e "${GREEN}────────────── PANEL MENU ───
 echo -e "${YELLOW} 1)${WHITE} 1 Panel"
 echo -e "${YELLOW} 2)${WHITE} Pterodactyl"
 echo -e "${YELLOW} 3)${WHITE} JackTera v3"
-echo -e "${YELLOW} 4)${WHITE} Jexpanel v4"
+echo -e "${YELLOW} 4)${WHITE} Jexpanel"
 echo -e "${YELLOW} 5)${WHITE} Dashboard v3"
 echo -e "${YELLOW} 6)${WHITE} Dashboard v4"
 echo -e "${YELLOW} 7)${WHITE} Payment Gateway"
