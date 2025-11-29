@@ -16,6 +16,7 @@ while true; do
 
         1)
             echo "Install Selected — but no commands exist here."
+            bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Dashboard-v3.sh)
             ;;
 
         2)
