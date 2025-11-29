@@ -38,7 +38,7 @@ banner(){
 panel_menu(){
 while true; do banner
 echo -e "${GREEN}────────────── PANEL MENU ──────────────${NC}"
-echo -e "${YELLOW} 1)${WHITE} 1 Panel"
+echo -e "${YELLOW} 1)${WHITE} FeatherPanel"
 echo -e "${YELLOW} 2)${WHITE} Pterodactyl"
 echo -e "${YELLOW} 3)${WHITE} JackTera v3"
 echo -e "${YELLOW} 4)${WHITE} Jexpanel"
