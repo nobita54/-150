@@ -16,7 +16,7 @@ while true; do
 
         1)
             echo ">> Install block empty hai — bole toh setup bhi likh du."
-            https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Jexpanel.sh
+            bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Jexpanel.sh)
             ;;
 
         2)
