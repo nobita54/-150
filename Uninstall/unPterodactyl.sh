@@ -18,9 +18,6 @@ install_ptero() {
     echo "│            Pterodactyl Installation          │"
     echo "└──────────────────────────────────────────────┘${NC}"
 
-    sudo apt update && sudo apt upgrade -y
-    sudo apt install -y curl wget git tar zip unzip software-properties-common
-
     bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/pterodactyl.sh) 
 
     echo -e "${GREEN}✔ Installation Complete${NC}"
