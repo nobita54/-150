@@ -57,7 +57,7 @@ case $p in
  2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unPterodactyl.sh) ;;
  3) bash <(curl -s https://raw.githubusercontent.com/yourlink/jacktera_v3.sh) ;;
  4) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unJexactyl.sh) ;;
- 5) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v3.sh) ;;
+ 5) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unMythicalDash.sh) ;;
  6) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v4.sh) ;;
  7) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Payment.sh) ;;
  8) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unCtrlPanel.sh) ;;
