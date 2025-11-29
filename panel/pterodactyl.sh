@@ -2,6 +2,7 @@
 clear
 read -p "Enter your domain (e.g., panel.example.com): " DOMAIN
 
+
 # --- Dependencies ---
 apt update && apt install -y curl apt-transport-https ca-certificates gnupg unzip git tar sudo lsb-release
 
@@ -41,7 +42,7 @@ chmod -R 755 storage/* bootstrap/cache/
 # --- MariaDB Setup ---
 DB_NAME=panel
 DB_USER=pterodactyl
-DB_PASS=$(openssl rand -base64 32)
+DB_PASS=yourPassword
 mariadb -e "CREATE USER '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
 mariadb -e "CREATE DATABASE ${DB_NAME};"
 mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
@@ -71,37 +72,14 @@ php artisan key:generate --force
 # --- Run Migrations ---
 php artisan migrate --seed --force
 
-# --- Install Bus UI ---
-echo "🚌 Installing Bus UI..."
-cd /var/www/pterodactyl
-
-# Download Bus UI
-BUS_UI_URL="https://github.com/psycho0/bus-ui/releases/latest/download/bus-ui.tar.gz"
-if curl --output /dev/null --silent --head --fail "$BUS_UI_URL"; then
-    curl -L -o bus-ui.tar.gz "$BUS_UI_URL"
-    tar -xzf bus-ui.tar.gz
-    
-    # Copy Bus UI assets to public directory
-    if [ -d "bus-ui" ]; then
-        cp -r bus-ui/* public/
-        rm -rf bus-ui bus-ui.tar.gz
-        echo "✅ Bus UI installed successfully!"
-    else
-        echo "⚠️  Bus UI directory not found, but archive was downloaded."
-    fi
-else
-    echo "⚠️  Bus UI download failed, continuing without it..."
-fi
-
 # --- Permissions ---
 chown -R www-data:www-data /var/www/pterodactyl/*
 apt install -y cron
 systemctl enable --now cron
 (crontab -l 2>/dev/null; echo "* * * * * php /var/www/pterodactyl/artisan schedule:run >> /dev/null 2>&1") | crontab -
-
 # --- Nginx Setup ---
-mkdir -p /etc/certs/pterodactyl
-cd /etc/certs/pterodactyl
+mkdir -p /etc/certs/panel
+cd /etc/certs/panel
 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 \
 -subj "/C=NA/ST=NA/L=NA/O=NA/CN=Generic SSL Certificate" \
 -keyout privkey.pem -out fullchain.pem
@@ -133,7 +111,7 @@ server {
 
     location ~ \.php\$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)\$;
-        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php${PHP_VERSION}-fpm.sock;
         fastcgi_index index.php;
         include /etc/nginx/fastcgi_params;
         fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M";
@@ -169,7 +147,6 @@ EOF
 systemctl daemon-reload
 systemctl enable --now redis-server
 systemctl enable --now pteroq.service
-
 clear
 # --- Admin User ---
 cd /var/www/pterodactyl
@@ -192,9 +169,8 @@ echo -e "\e[1;36m  ✅ Installation Completed Successfully! \e[0m"
 echo -e "\e[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
 echo -e "\e[1;32m  🌐 Your Panel URL: \e[1;37mhttps://${DOMAIN}\e[0m"
 echo -e "\e[1;32m  📂 Panel Directory: \e[1;37m/var/www/pterodactyl\e[0m"
-echo -e "\e[1;32m  🚌 Bus UI: \e[1;37mInstalled and Active\e[0m"
 echo -e "\e[1;32m  🛠 Create Admin: \e[1;37mphp artisan p:user:make\e[0m"
 echo -e "\e[1;32m  🔑 DB User: \e[1;37m${DB_USER}\e[0m"
 echo -e "\e[1;32m  🔑 DB Password: \e[1;37m${DB_PASS}\e[0m"
 echo -e "\e[1;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\e[0m"
-echo -e "\e[1;35m  🎉 Enjoy your Pterodactyl Panel with Bus UI! \e[0m"
+echo -e "\e[1;35m  🎉 Enjoy your Pterodactyl Panel! \e[0m"
