@@ -55,7 +55,7 @@ read -p "Select → " p
 case $p in
  1) curl -sSL https://get.featherpanel.com/beta.sh | bash ;;
  2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unPterodactyl.sh) ;;
- 3) bash <(curl -s https://raw.githubusercontent.com/yourlink/jacktera_v3.sh) ;;
+ 3) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Jexactyl.sh) ;;
  4) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unJexactyl.sh) ;;
  5) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unMythicalDash.sh) ;;
  6) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v4.sh) ;;
