@@ -59,7 +59,7 @@ case $p in
  4) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unJexactyl.sh) ;;
  5) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unMythicalDash.sh) ;;
  6) bash <(curl -s https://raw.githubusercontent.com/yourlink/dashboard_v4.sh) ;;
- 7) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Payment.sh) ;;
+ 7) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unPaymenter.sh) ;;
  8) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unCtrlPanel.sh) ;;
  9) bash <(curl -s https://raw.githubusercontent.com/yourlink/cpanel.sh) ;;
  10) bash <(curl -s https://raw.githubusercontent.com/yourlink/t-panel.sh) ;;   # UPDATED
