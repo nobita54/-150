@@ -1,88 +1,79 @@
 #!/bin/bash
 
 # ===== COLORS =====
-RED="\e[31m"; GREEN="\e[32m"; YELLOW="\e[33m"; BLUE="\e[34m"; CYAN="\e[36m"; RESET="\e[0m"
+R="\e[31m"; G="\e[32m"; Y="\e[33m"; B="\e[34m"; C="\e[36m"; W="\e[37m"; U="\e[4m"; N="\e[0m"
 
+while true; do
 clear
-echo -e "${CYAN}"
-echo "╔════════════════════════════════════════════╗"
-echo "║         VPS REAL-TIME DIAGNOSTIC TOOL      ║"
-echo "╚════════════════════════════════════════════╝"
-echo -e "${RESET}"
+echo -e "${C}"
+echo "╔════════════════════════════════════════════════╗"
+echo "║                VPS ANALYZER PRO UI              ║"
+echo "╚════════════════════════════════════════════════╝${N}"
 
+echo -e "
+ ${G}╔═══════════════╗    ${Y}╔═══════════════╗    ${B}╔═══════════════╗
+ ${G}║ 1) System Info║    ${Y}║ 2) Disk+RAM   ║    ${B}║ 3) Network     ║
+ ${G}╚═══════════════╝    ${Y}╚═══════════════╝    ${B}╚═══════════════╝
 
-# ================= SYSTEM INFORMATION =================
-echo -e "${YELLOW}🖥 SYSTEM INFORMATION${RESET}"
-echo -e "${GREEN}Hostname       :${RESET} $(hostname)"
-echo -e "${GREEN}OS Version     :${RESET} $(lsb_release -d 2>/dev/null | awk -F':' '{print $2}')"
-echo -e "${GREEN}Kernel         :${RESET} $(uname -r)"
-echo -e "${GREEN}Architecture   :${RESET} $(uname -m)"
-echo -e "${GREEN}Uptime         :${RESET} $(uptime -p)"
-echo ""
+ ${R}╔═══════════════╗    ${C}╔════════════════╗    ${Y}╔═══════════════╗
+ ${R}║ 4) Fake Check ║    ${C}║ 5) Live Traffic║    ${Y}║ 6) Exit       ║
+ ${R}╚═══════════════╝    ${C}╚════════════════╝    ${Y}╚═══════════════╝
+"
 
+echo -ne "${W}Select Option → ${N}"
+read op
 
-# ================= RAM / MEMORY =================
-echo -e "${YELLOW}🧠 MEMORY STATUS${RESET}"
-free -h | awk '
-NR==1{print "Type    Total    Used    Free"}
-NR==2{printf "RAM     %-7s %-7s %-7s\n",$2,$3,$4}
-NR==3{printf "SWAP    %-7s %-7s %-7s\n",$2,$3,$4}'
-echo ""
+case $op in
 
+# 1) System Info
+1)
+clear; echo -e "${U}${G}📌 SYSTEM INFORMATION${N}\n"
+echo "Hostname      : $(hostname)"
+echo "OS            : $(lsb_release -d | awk -F':' '{print $2}')"
+echo "Kernel        : $(uname -r)"
+echo "Model         : $(awk -F': ' '/model name/ {print $2; exit}' /proc/cpuinfo)"
+echo "Uptime        : $(uptime -p)"
+echo ""; read -p "↩ Back to Menu..." ;;
+  
+# 2) Disk + RAM
+2)
+clear; echo -e "${U}${C}💽 RAM & DISK STATUS${N}\n"
+free -h | awk 'NR==1{print "Type   Total   Used   Free"} NR==2{printf "RAM    %-7s %-7s %-7s\n",$2,$3,$4} NR==3{printf "SWAP   %-7s %-7s %-7s\n",$2,$3,$4}'
+echo ""; df -h --output=source,size,used,avail,pcent | column -t
+echo ""; read -p "↩ Back to Menu..." ;;
 
-# ================= DISK USAGE =================
-echo -e "${YELLOW}💽 DISK STATUS${RESET}"
-df -h --output=source,size,used,avail,pcent | grep -E '/|Filesystem' | column -t
-echo ""
-
-
-# ================= NETWORK INFO =================
-echo -e "${YELLOW}🌐 NETWORK DETAILS${RESET}"
-echo -e "${GREEN}Local IP  :${RESET} $(hostname -I | awk '{print $1}')"
-echo -e "${GREEN}Public IP :${RESET} $(curl -s ifconfig.me)"
-echo -e "${GREEN}Gateway   :${RESET} $(ip route | awk '/default/ {print $3}')"
-echo ""
-
-
-# ================= VPS FAKE / REAL TEST =================
-echo -e "${YELLOW}🕵 CHECKING IF VPS IS REAL OR FAKE${RESET}"
+# 3) Network
+3)
+clear; echo -e "${U}${Y}🌐 NETWORK REPORT${N}\n"
+echo "Local IP   : $(hostname -I | awk '{print $1}')"
+echo "Public IP  : $(curl -s ifconfig.me)"
+echo "Gateway    : $(ip route | awk '/default/ {print $3}')"
+echo ""; read -p "↩ Back to Menu..." ;;
+  
+# 4 Fake Real Check
+4)
+clear; echo -e "${U}${R}🕵 VPS AUTHENTICITY CHECK${N}\n"
 virt=$(systemd-detect-virt)
+echo "Virtualization → $virt"
 
-echo -e "${BLUE}Virtualization Detected: ${RESET}$virt"
+grep -E -o 'vmx|svm' /proc/cpuinfo >/dev/null \
+&& echo -e "${G}✔ REAL CPU Virtualization Found${N}" \
+|| echo -e "${R}❗ CPU Flag Missing — Fake/Weak VPS Likely${N}"
 
-if [[ "$virt" == "kvm" ]]; then
-    echo -e "${GREEN}✔ REAL VPS — KVM Detected (Legit Performance)${RESET}"
-elif [[ "$virt" == "qemu" ]]; then
-    echo -e "${GREEN}✔ REAL VPS — QEMU Virtualization${RESET}"
-elif [[ "$virt" == "openvz" ]]; then
-    echo -e "${RED}❗ Possible FAKE VPS — OpenVZ Oversold Common${RESET}"
-elif [[ "$virt" == "lxc" ]]; then
-    echo -e "${RED}❗ Container VPS (Shared Kernel) Not Full VPS${RESET}"
-else
-    echo -e "${YELLOW}❓ Unknown — Could Be Bare Metal / Nested VM${RESET}"
-fi
-
-
-echo ""
-echo -e "${YELLOW}🧪 CPU REALITY TEST${RESET}"
-if grep -E -o 'vmx|svm' /proc/cpuinfo >/dev/null; then
-    echo -e "${GREEN}✔ Hardware Virtualization Flag Present (Strong CPU Core)${RESET}"
-else
-    echo -e "${RED}❗ VMX/SVM Missing → CPU Virtual, Might Be Low Quality VPS${RESET}"
-fi
-
-
-echo ""
-echo -e "${YELLOW}💽 DISK SPEED (REALITY CHECK — 512MB)${RESET}"
-speed=$(dd if=/dev/zero of=test.img bs=1M count=512 oflag=direct 2>&1 | grep -o '[0-9.]\+ MB/s')
+speed=$(dd if=/dev/zero of=test.img bs=1M count=256 oflag=direct 2>&1 | grep -o '[0-9.]\+ MB/s')
 rm -f test.img
-echo -e "${CYAN}Disk Speed:${RESET} ${speed}"
-[[ $(echo "$speed < 200" | bc) -eq 1 ]] && echo -e "${RED}❗ Slow IO = VPS likely Fake/Oversold${RESET}" || echo -e "${GREEN}✔ IO Speed Good${RESET}"
+echo -e "\nDisk Speed → $speed"
+echo ""; read -p "↩ Back to Menu..." ;;
+  
+# 5 Live Traffic
+5)
+clear; echo -e "${U}${B}📡 LIVE TRAFFIC (Ctrl+C exit)${N}\n"
+iftop -n -P || echo -e "${R}Install: sudo apt install iftop -y${N}"
+read -p "↩ Back to Menu..." ;;
 
-
-# ================= LIVE NETWORK TRAFFIC =================
-echo ""
-echo -e "${YELLOW}📡 LIVE NETWORK TRAFFIC MONITOR${RESET}"
-echo -e "${CYAN}Press CTRL + C to exit monitoring${RESET}"
-sleep 2
-iftop -n -P || echo -e "${RED}iftop missing → install with: sudo apt install iftop -y${RESET}"
+# Exit
+6)
+exit ;;
+*) echo "Invalid Option"; sleep 1 ;;
+esac
+done
