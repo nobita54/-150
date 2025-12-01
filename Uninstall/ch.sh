@@ -86,7 +86,7 @@ read -p "Select → " t
 
 case $t in
  1) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/root.sh) ;;
- 2) bash <(curl -s https://raw.githubusercontent.com/yourlink/tailscale.sh) ;;
+ 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/Tailscale.sh) ;;
  3) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/cf.sh) ;;
  4) bash <(curl -s https://raw.githubusercontent.com/yourlink/systeminfo.sh) ;;
  5) bash <(curl -s https://raw.githubusercontent.com/yourlink/ipv4.sh) ;;
