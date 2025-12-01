@@ -124,7 +124,7 @@ main_menu(){
 while true; do banner
 echo -e "${CYAN}────────────── MAIN MENU ──────────────${NC}"
 echo -e "${YELLOW} 1)${WHITE} Panel"
-echo -e "${YELLOW} 2)${WHITE} Wings Installer"
+echo -e "${YELLOW} 2)${WHITE} Wings "
 echo -e "${YELLOW} 3)${WHITE} Tools"
 echo -e "${YELLOW} 4)${WHITE} Theme"
 echo -e "${YELLOW} 5)${WHITE} Exit"
@@ -133,7 +133,7 @@ read -p "Select → " c
 
 case $c in
  1) panel_menu;;
- 2) bash <(curl -s https://raw.githubusercontent.com/yourlink/wings.sh) ;;
+ 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/wing.sh) ;;
  3) tools_menu;;
  4) theme_menu;;
  5) echo -e "${GREEN}Exiting — CODING HUB by Nobita${NC}"; exit;;
