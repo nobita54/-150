@@ -67,6 +67,7 @@ echo ""; read -p "↩ Back to Menu..." ;;
   
 # 5 Live Traffic
 5)
+sudo apt install iftop -y
 clear; echo -e "${U}${B}📡 LIVE TRAFFIC (Ctrl+C exit)${N}\n"
 iftop -n -P || echo -e "${R}Install: sudo apt install iftop -y${N}"
 read -p "↩ Back to Menu..." ;;
