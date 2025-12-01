@@ -16,6 +16,7 @@ while true; do
 
         1)
             echo "Install Selected — no commands added yet."
+            bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/Payment.sh) 
             ;;
 
         2)
