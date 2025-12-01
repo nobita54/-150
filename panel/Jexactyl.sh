@@ -52,7 +52,7 @@ while true; do
             cd /var/www/pterodactyl
 
             chmod -R 755 storage/* bootstrap/cache
-            composer install --no-dev --optimize-autoloader
+            COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
 
             echo "🧹 Clearing cache..."
             php artisan view:clear
