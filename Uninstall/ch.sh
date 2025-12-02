@@ -77,7 +77,7 @@ echo -e "${YELLOW} 1)${WHITE} Root Access"
 echo -e "${YELLOW} 2)${WHITE} Tailscale"
 echo -e "${YELLOW} 3)${WHITE} Cloudflare DNS"
 echo -e "${YELLOW} 4)${WHITE} System Info"
-echo -e "${YELLOW} 5)${WHITE} IPv4 Fix"
+echo -e "${YELLOW} 5)${WHITE} Vps Run"
 echo -e "${YELLOW} 6)${WHITE} Port Forward"
 echo -e "${YELLOW} 7)${WHITE} RDP Installer"
 echo -e "${YELLOW} 8)${WHITE} Back"
@@ -89,7 +89,7 @@ case $t in
  2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/Tailscale.sh) ;;
  3) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/cf.sh) ;;
  4) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/SYSTEM.sh) ;;
- 5) bash <(curl -s https://raw.githubusercontent.com/yourlink/ipv4.sh) ;;
+ 5) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/vps.sh) ;;
  6) bash <(curl -s https://raw.githubusercontent.com/yourlink/portforward.sh) ;;
  7) bash <(curl -s https://raw.githubusercontent.com/yourlink/rdp.sh) ;;
  8) break;;
