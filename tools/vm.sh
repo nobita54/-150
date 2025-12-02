@@ -28,9 +28,6 @@ check_tui_dependencies() {
 display_header() {
     clear
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║${NC}   ${CYAN}╔═╗╦ ╦╔═╗╔╦╗╦ ╦╔═╗╔╗╔  ╔╦╗┌─┐┌┬┐┌─┐┌─┐┌─┐╦  ┌─┐${NC}   ${PURPLE}║${NC}"
-    echo -e "${PURPLE}║${NC}   ${CYAN}╠═╣║ ║╠═╝ ║ ╠═╣║╣ ║║║   ║║│ │ ││├┤ └─┐└─┐║  └─┐${NC}   ${PURPLE}║${NC}"
-    echo -e "${PURPLE}║${NC}   ${CYAN}╩ ╩╚═╝╩   ╩ ╩ ╩╚═╝╝╚╝  ═╩╝└─┘─┴┘└─┘└─┘└─┘╩═╝└─┘${NC}   ${PURPLE}║${NC}"
     echo -e "${PURPLE}║${NC}                                                            ${PURPLE}║${NC}"
     echo -e "${PURPLE}║${NC}            ${YELLOW}QEMU Virtual Machine Manager${NC}           ${PURPLE}║${NC}"
     echo -e "${PURPLE}║${NC}                 ${GREEN}with Cloud-Init Support${NC}             ${PURPLE}║${NC}"
