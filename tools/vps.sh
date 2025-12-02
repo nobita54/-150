@@ -149,7 +149,7 @@ EOF
     clear
     echo -e "${B}⚙ Starting IDX VM From Your GitHub Script...${N}"
     echo ""
-    echo -e "${C}Running: bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/vm.sh)${N}"
+    echo -e "${C}Running:"
     echo ""
 
     bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/vm.sh)
