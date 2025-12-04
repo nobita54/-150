@@ -12,7 +12,7 @@ while true; do
     echo "======================="
     echo "       MACK MENU       "
     echo "======================="
-    echo "1) Full Installer"
+    echo "1) p"
     echo "2) Local IP"
     echo "3) Uninstall (Wings Only)"
     echo "0) Exit"
