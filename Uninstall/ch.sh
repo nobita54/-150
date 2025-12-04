@@ -133,7 +133,7 @@ read -p "Select → " c
 
 case $c in
  1) panel_menu;;
- 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/wing.sh) ;;
+ 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unwings.sh) ;;
  3) tools_menu;;
  4) theme_menu;;
  5) echo -e "${GREEN}Exiting — CODING HUB by Nobita${NC}"; exit;;
