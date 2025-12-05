@@ -1,59 +1,84 @@
 #!/bin/bash
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+BOLD='\033[1m'
+
 while true; do
     clear
-    echo "============================"
-    echo "       CTRL PANEL MANAGER   "
-    echo "============================"
-    echo "1) Install   (Blank)"
-    echo "2) Uninstall CTRL Panel"
-    echo "3) Update CTRL Panel"
-    echo "4) Exit"
-    echo "----------------------------"
-    read -p "Select Option [1-4] : " option
+    echo -e "${CYAN}╔════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${NC}${PURPLE}         ░█▀▀░█▀█░█▀▄░█▀▀░█░░        ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}${PURPLE}         ░█▀▀░█▀█░█▀▄░█▀▀░█░░        ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}${PURPLE}         ░▀░░░▀░▀░▀░▀░▀▀▀░▀▀▀        ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC}${YELLOW}           C T R L   P A N E L         ${NC}${CYAN}║${NC}"
+    echo -e "${CYAN}╠════════════════════════════════════════╣${NC}"
+    echo -e "${CYAN}║${NC} ${GREEN}›${NC} ${BOLD}1)${NC} Install CTRL Panel          ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC} ${RED}›${NC} ${BOLD}2)${NC} Uninstall CTRL Panel       ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC} ${YELLOW}›${NC} ${BOLD}3)${NC} Update CTRL Panel         ${CYAN}║${NC}"
+    echo -e "${CYAN}║${NC} ${BLUE}›${NC} ${BOLD}4)${NC} Exit                       ${CYAN}║${NC}"
+    echo -e "${CYAN}╚════════════════════════════════════════╝${NC}"
+    echo ""
+    read -p "$(echo -e "${YELLOW}👉 Select an option [1-4]:${NC} ")" option
 
     case $option in
-
         1)
-            echo "Install Block Empty — bol de toh main likh du."
+            echo -e "\n${GREEN}🚀 Installing CTRL Panel...${NC}"
+            echo -e "${CYAN}Please wait while we set up everything...${NC}\n"
             bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/panel/CtrlPanel.sh)
             ;;
-
         2)
-            echo "⚠ Uninstall Starting — CTRL Panel will be removed completely."
-            cd /var/www/ctrlpanel
-            sudo php artisan down
+            echo -e "\n${RED}⚠️  WARNING: This will remove CTRL Panel completely!${NC}"
+            read -p "Are you sure? (y/N): " confirm
+            if [[ $confirm == "y" || $confirm == "Y" ]]; then
+                echo -e "${RED}🗑️  Uninstalling CTRL Panel...${NC}"
+                
+                cd /var/www/ctrlpanel 2>/dev/null
+                sudo php artisan down 2>/dev/null
 
-            sudo systemctl stop ctrlpanel
-            sudo systemctl disable ctrlpanel
-            sudo rm /etc/systemd/system/ctrlpanel.service
-            sudo systemctl daemon-reload
-            sudo systemctl reset-failed
+                sudo systemctl stop ctrlpanel 2>/dev/null
+                sudo systemctl disable ctrlpanel 2>/dev/null
+                sudo rm /etc/systemd/system/ctrlpanel.service 2>/dev/null
+                sudo systemctl daemon-reload
+                sudo systemctl reset-failed
 
-            # Remove Cron
-            sudo crontab -l | grep -v 'php /var/www/ctrlpanel/artisan schedule:run' | sudo crontab - || true
+                # Remove Cron
+                sudo crontab -l | grep -v 'php /var/www/ctrlpanel/artisan schedule:run' | sudo crontab - || true
 
-            # Remove Nginx Config
-            sudo unlink /etc/nginx/sites-enabled/ctrlpanel.conf
-            sudo rm /etc/nginx/sites-available/ctrlpanel.conf
-            sudo systemctl reload nginx
+                # Remove Nginx Config
+                sudo unlink /etc/nginx/sites-enabled/ctrlpanel.conf 2>/dev/null
+                sudo rm /etc/nginx/sites-available/ctrlpanel.conf 2>/dev/null
+                sudo systemctl reload nginx 2>/dev/null
 
-            # Database Removal
-            echo "MariaDB Login Required to Drop Database & User"
-            mariadb -u root -p <<EOF
-DROP DATABASE ctrlpanel;
-DROP USER 'ctrlpaneluser'@'127.0.0.1';
+                # Database Removal
+                echo -e "${RED}🗃️  Removing database...${NC}"
+                mariadb -u root -p <<EOF 2>/dev/null
+DROP DATABASE IF EXISTS ctrlpanel;
+DROP USER IF EXISTS 'ctrlpaneluser'@'127.0.0.1';
 FLUSH PRIVILEGES;
 EOF
 
-            sudo rm -rf /var/www/ctrlpanel
+                sudo rm -rf /var/www/ctrlpanel 2>/dev/null
 
-            echo "✔ Uninstall Complete — system kahani khatam. 🧹"
+                echo -e "${GREEN}✅ Uninstall complete! All files removed.${NC}"
+            else
+                echo -e "${YELLOW}❌ Uninstall cancelled.${NC}"
+            fi
             ;;
-
         3)
-            echo "🔄 Updating CTRL Panel..."
-            cd /var/www/ctrlpanel
+            echo -e "\n${YELLOW}🔄 Updating CTRL Panel...${NC}"
+            cd /var/www/ctrlpanel 2>/dev/null || {
+                echo -e "${RED}❌ CTRL Panel directory not found!${NC}"
+                echo -e "${YELLOW}Please install CTRL Panel first.${NC}"
+                read -p "Press Enter to continue..."
+                continue
+            }
+            
             php artisan down
 
             git stash
@@ -66,19 +91,17 @@ EOF
             php artisan queue:restart
             php artisan up
 
-            echo "✔ Update Done — code naya, panel taza. 🚀"
+            echo -e "${GREEN}✅ Update complete! Panel is now up to date.${NC}"
             ;;
-
         4)
-            echo "Exit — terminal chup, raat geheri. 🌙"
+            echo -e "\n${BLUE}👋 Exiting... Have a great day!${NC}\n"
             exit 0
             ;;
-
         *)
-            echo "Galat number — 1 se 4 me se choose karo."
+            echo -e "\n${RED}❌ Invalid option! Please choose between 1-4.${NC}"
             ;;
     esac
 
-    echo
-    read -p "Press Enter to return to menu..."
+    echo ""
+    read -p "$(echo -e "${CYAN}Press ${BOLD}Enter${NC}${CYAN} to return to menu...${NC}")" dummy
 done
