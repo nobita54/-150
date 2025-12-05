@@ -134,7 +134,7 @@ while true; do
             chmod -R 755 storage/* bootstrap/cache/
             
             echo -e "${CYAN}Installing dependencies...${NC}"
-            composer install --no-dev --optimize-autoloader
+            COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
             
             echo -e "${CYAN}Optimizing and migrating...${NC}"
             php artisan optimize:clear
