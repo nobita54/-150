@@ -62,7 +62,7 @@ case $p in
  7) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unPaymenter.sh) ;;
  8) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unCtrlPanel.sh) ;;
  9) bash <(curl -s https://raw.githubusercontent.com/yourlink/cpanel.sh) ;;
- 10) bash <(curl -s https://raw.githubusercontent.com/yourlink/t-panel.sh) ;;   # UPDATED
+ 10) bash <(curl -s https://raw.githubusercontent.com/yourlink/t-panel.sh) ;;
  11) break;;
  *) echo -e "${RED}Invalid Option${NC}"; pause;;
 esac
@@ -123,20 +123,22 @@ done
 main_menu(){
 while true; do banner
 echo -e "${CYAN}────────────── MAIN MENU ──────────────${NC}"
-echo -e "${YELLOW} 1)${WHITE} Panel"
-echo -e "${YELLOW} 2)${WHITE} Wings "
-echo -e "${YELLOW} 3)${WHITE} Tools"
-echo -e "${YELLOW} 4)${WHITE} Theme"
-echo -e "${YELLOW} 5)${WHITE} Exit"
+echo -e "${YELLOW} 1)${WHITE} Vps Run"
+echo -e "${YELLOW} 2)${WHITE} Panel"
+echo -e "${YELLOW} 3)${WHITE} Wings "
+echo -e "${YELLOW} 4)${WHITE} Tools"
+echo -e "${YELLOW} 5)${WHITE} Theme"
+echo -e "${YELLOW} 6)${WHITE} Exit"
 echo -e "${CYAN}──────────────────────────────────────${NC}"
 read -p "Select → " c
 
 case $c in
- 1) panel_menu;;
- 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unwings.sh) ;;
- 3) tools_menu;;
- 4) theme_menu;;
- 5) echo -e "${GREEN}Exiting — CODING HUB by Nobita${NC}"; exit;;
+ 1) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/tools/vps.sh) ;;
+ 2) panel_menu;;
+ 3) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/Uninstall/unwings.sh) ;;
+ 4) tools_menu;;
+ 5) theme_menu;;
+ 6) echo -e "${GREEN}Exiting — CODING HUB by Nobita${NC}"; exit;;
  *) echo -e "${RED}Invalid${NC}"; pause;;
 esac
 done
