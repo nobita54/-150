@@ -43,8 +43,8 @@ while true; do
     print_header
     
     print_option "1" "GitHub / VM" "$G"
-    print_option "2" "IDX Tool" "$Y"
-    print_option "3" "IDX VM" "$B"
+    print_option "2" "Tool" "$Y"
+    print_option "3" "Run" "$B"
     print_option "4" "Exit" "$R"
     
     echo -e "${M}════════════════════════════════════════════════${N}"
