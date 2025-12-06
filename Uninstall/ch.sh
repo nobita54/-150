@@ -111,7 +111,7 @@ read -p "Select → " th
 
 case $th in
  1) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/thame/blueprint.sh) ;;
- 2) bash <(curl -s https://raw.githubusercontent.com/yourlink/change_theme.sh) ;;
+ 2) bash <(curl -s https://raw.githubusercontent.com/nobita54/-150/refs/heads/main/thame/chang.sh) ;;
  3) bash <(curl -s https://raw.githubusercontent.com/yourlink/theme_uninstall.sh) ;;
  4) break;;
  *) echo -e "${RED}Invalid${NC}"; pause;;
