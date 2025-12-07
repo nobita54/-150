@@ -31,9 +31,9 @@ while true; do
     
     # Menu Options
     echo -e "${CYAN}┌────────────────────────────────────────────┐${NC}"
-    echo -e "${CYAN}│${NC} ${GREEN}📦${NC} ${BOLD}1.${NC} Install Jexactyl Panel          ${CYAN}│${NC}"
-    echo -e "${CYAN}│${NC} ${RED}🗑️${NC} ${BOLD}2.${NC} Uninstall / Remove Jexactyl       ${CYAN}│${NC}"
-    echo -e "${CYAN}│${NC} ${YELLOW}🔄${NC} ${BOLD}3.${NC} Update Jexactyl Panel           ${CYAN}│${NC}"
+    echo -e "${CYAN}│${NC} ${GREEN}📦${NC} ${BOLD}1.${NC} Install       ${CYAN}│${NC}"
+    echo -e "${CYAN}│${NC} ${RED}🗑️${NC} ${BOLD}2.${NC} Uninstall      ${CYAN}│${NC}"
+    echo -e "${CYAN}│${NC} ${YELLOW}🔄${NC} ${BOLD}3.${NC} Update          ${CYAN}│${NC}"
     echo -e "${CYAN}│${NC} ${BLUE}🚪${NC} ${BOLD}4.${NC} Exit Menu                       ${CYAN}│${NC}"
     echo -e "${CYAN}├────────────────────────────────────────────┤${NC}"
     echo -e "${CYAN}│${NC} ${PURPLE}💡${NC} Need help? Check docs: jexactyl.com      ${CYAN}│${NC}"
