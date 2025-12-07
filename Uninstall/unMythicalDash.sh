@@ -32,9 +32,9 @@ while true; do
     
     # Menu Options
     echo -e "${PURPLE}┌────────────────────────────────────────────────┐${NC}"
-    echo -e "${PURPLE}│${NC} ${GREEN}🚀${NC} ${BOLD}1.${NC} Install MythicalDash                ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${YELLOW}🔄${NC} ${BOLD}2.${NC} Update MythicalDash                 ${PURPLE}│${NC}"
-    echo -e "${PURPLE}│${NC} ${RED}🗑️${NC} ${BOLD}3.${NC} Uninstall MythicalDash               ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${GREEN}🚀${NC} ${BOLD}1.${NC} Install                 ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${YELLOW}🔄${NC} ${BOLD}2.${NC} Update                  ${PURPLE}│${NC}"
+    echo -e "${PURPLE}│${NC} ${RED}🗑️${NC} ${BOLD}3.${NC} Uninstall                ${PURPLE}│${NC}"
     echo -e "${PURPLE}│${NC} ${BLUE}🚪${NC} ${BOLD}4.${NC} Exit                                 ${PURPLE}│${NC}"
     echo -e "${PURPLE}├────────────────────────────────────────────────┤${NC}"
     echo -e "${PURPLE}│${NC} ${CYAN}📊${NC} Version: 3.2.3 | By: MythicalLTD            ${PURPLE}│${NC}"
