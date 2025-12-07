@@ -27,7 +27,7 @@ show_menu() {
     printf "${MAGENTA}╔════════════════════════════════════════════════════════════╗\n"
     printf "║${WHITE}                     📋 MAIN MENU                          ${MAGENTA}║\n"
     printf "╠════════════════════════════════════════════════════════════╣\n"
-    printf "║${GREEN}   1. ${WHITE}📥 Install Paymenter (with Ad-blocker)         ${MAGENTA}║\n"
+    printf "║${GREEN}   1. ${WHITE}📥 Install Paymenter         ${MAGENTA}║\n"
     printf "║${RED}   2. ${WHITE}🗑️  Uninstall Paymenter                        ${MAGENTA}║\n"
     printf "║${YELLOW}   3. ${WHITE}🔄 Update Paymenter                          ${MAGENTA}║\n"
     printf "║${WHITE}   4. ${WHITE}❌ Exit                                      ${MAGENTA}║\n"
