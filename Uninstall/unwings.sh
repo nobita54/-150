@@ -33,9 +33,9 @@ show_menu() {
     echo -e "${B}${TL}════════════════════════════════════════════════════════════${TR}${N}"
     echo -e "${VL}${W}                     📋 MAIN MENU                          ${B}${VL}${N}"
     echo -e "${LT}════════════════════════════════════════════════════════════${RT}${N}"
-    echo -e "${VL}${G}   1. ${W}🌐 Public IP & Network Setup                   ${B}${VL}${N}"
-    echo -e "${VL}${C}   2. ${W}🏠 Local IP Information                        ${B}${VL}${N}"
-    echo -e "${VL}${R}   3. ${W}🗑️  Uninstall Wings (Panel Safe)              ${B}${VL}${N}"
+    echo -e "${VL}${G}   1. ${W}🌐 Public IP                 ${B}${VL}${N}"
+    echo -e "${VL}${C}   2. ${W}🏠 Local IP                        ${B}${VL}${N}"
+    echo -e "${VL}${R}   3. ${W}🗑️  Uninstall             ${B}${VL}${N}"
     echo -e "${VL}${Y}   0. ${W}🚪 Exit                                        ${B}${VL}${N}"
     echo -e "${BL}════════════════════════════════════════════════════════════${BR}${N}\n"
 }
