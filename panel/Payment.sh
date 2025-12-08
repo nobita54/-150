@@ -195,9 +195,9 @@ print_status "Configuring MariaDB database..."
 animate_text "Creating database and user..."
 
 # Create DB user and DB (binds to 127.0.0.1)
-mariadb -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mariadb -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
-mariadb -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
+mariadb -e "CREATE USER '${DB_USER}'@'127.0.0.1' IDENTIFIED BY '${DB_PASS}';"
+mariadb -e "CREATE DATABASE ${DB_NAME};"
+mariadb -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'127.0.0.1' WITH GRANT OPTION;"
 mariadb -e "FLUSH PRIVILEGES;"
 print_success "Database '${DB_NAME}' created with user '${DB_USER}'"
 
