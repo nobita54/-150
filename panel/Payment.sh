@@ -364,6 +364,11 @@ server {
 }
 EOF
 
+# Disable adblock include to prevent nginx crash
+sed -i 's|include /etc/nginx/adblock/blocked_sites.conf;|# include /etc/nginx/adblock/blocked_sites.conf;|g' /etc/nginx/conf.d/adblock.conf
+rm -f /etc/nginx/conf.d/adblock.conf
+rm -rf /etc/nginx/adblock
+
 ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/paymenter.conf
 
 # Remove default site if exists to avoid conflicts
