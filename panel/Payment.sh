@@ -243,6 +243,15 @@ print_success "Application key generated"
 sudo -u www-data php artisan storage:link || true
 print_success "Storage link created"
 
+mysql -u root -p -e "
+ALTER USER 'paymenter'@'localhost' IDENTIFIED BY 'yourPassword';
+FLUSH PRIVILEGES;
+" && \
+php artisan config:clear && \
+php artisan cache:clear && \
+php artisan optimize:clear && \
+php artisan migrate --force --seed
+
 # Run migrations and seeds
 print_status "Running database migrations and seeding..."
 sudo -u www-data php artisan migrate --force --seed &
