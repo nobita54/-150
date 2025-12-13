@@ -84,7 +84,7 @@ COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader
 ###################################################
 DB="mythicaldash_remastered"
 USER="mythicaldash_remastered"
-PASS="yourPassword"
+PASS="1234"
 
 mariadb -e "CREATE DATABASE $DB;"
 mariadb -e "CREATE USER '$USER'@'127.0.0.1' IDENTIFIED BY '$PASS';"
